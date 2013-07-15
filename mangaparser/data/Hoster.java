@@ -82,6 +82,13 @@ public abstract class Hoster implements XMLize {
 		return new ArrayList<Manga>();
 	}
 	
+	public Manga findMangaByTitle(String title) {
+		for (Manga m: mangas) {
+			if (m.title.equals(title)) return m;
+		}
+		return null;
+	}
+	
 	/**
 	 * Saves the instance to db.
 	 */

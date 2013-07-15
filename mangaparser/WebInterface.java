@@ -1,14 +1,14 @@
 package mangaparser;
 
 import java.io.PrintStream;
+
+import mangaparser.data.Chapter;
 import mangaparser.data.Hoster;
 import mangaparser.data.Manga;
 
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
 import org.simpleframework.http.core.Container;
-
-import com.google.code.morphia.query.Query;
 
 public class WebInterface implements Container {
 	MangaParser parent;
@@ -31,14 +31,16 @@ public class WebInterface implements Container {
 			// issue refresh
 			if (request.getQuery().containsKey("refresh")) {
 				if (request.getQuery().containsKey("hoster")) {
+					// get hoster
 					String requestedHoster = request.getQuery().get("hoster");
+					Hoster hoster = MangaParser.getInstance().ds.find(Hoster.class, "name", requestedHoster).get();
 					if (request.getQuery().containsKey("manga")) {
-						// refresh chapters
-						//TODO code!
+						String requestedManga = request.getQuery().get("manga");
+						Manga manga = hoster.findMangaByTitle(requestedManga);
+						manga.loadChapters();
 					} else {
 						// refresh mangas
-						Hoster res = MangaParser.getInstance().ds.find(Hoster.class, "name", requestedHoster).get();
-						res.loadMangas();
+						hoster.loadMangas();
 					}
 				}
 			}
@@ -47,16 +49,14 @@ public class WebInterface implements Container {
 			if (request.getQuery().containsKey("hoster")) {
 				// get hoster
 				String requestedHoster = request.getQuery().get("hoster");
+				Hoster hoster = MangaParser.getInstance().ds.find(Hoster.class, "name", requestedHoster).get();
 				if (request.getQuery().containsKey("manga")) {
 					String requestedManga = request.getQuery().get("manga");
-					body.println(requestedManga);
-					Manga res = MangaParser.getInstance().ds.createQuery(Manga.class).get();
-					//Manga res = MangaParser.getInstance().getDatastore().find(Manga.class, "title", requestedManga).get();
-					if (res != null) body.print(res.toXML(Manga.class));
+					Manga m = hoster.findMangaByTitle(requestedManga);
+					body.print(m.toXML(Chapter.class));
 				} else {
 					// request hoster
-					Hoster res = MangaParser.getInstance().ds.find(Hoster.class, "name", requestedHoster).get();
-					body.println(res.toXML(Manga.class));
+					body.print(hoster.toXML(Manga.class));
 				}
 			} else {
 				// default request. list hoster.

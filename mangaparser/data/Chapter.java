@@ -57,9 +57,12 @@ public abstract class Chapter implements XMLize {
 	public String toXML(Class<?> limit) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<Chapter>");
+		sb.append(String.format("<Title>%s</Title>", getTitle()));
+		sb.append("<Pages>");
 		for (String page: pages) {
 			sb.append(String.format("<Page>%s</Page>", page));
 		}
+		sb.append("</Pages>");
 		sb.append("</Chapter>");
 		return sb.toString();
 	}
