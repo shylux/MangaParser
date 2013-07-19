@@ -1,0 +1,52 @@
+<!-- im writing this without network access. so i will have to use workarounds if i forget the correct html/js usage. -->
+<html>
+	<head>
+		<script type="text/javascript" src="/DataTables1.9.4/media/js/jquery.js"></script>
+		<script type="text/javascript" src="/DataTables1.9.4/media/js/jquery.dataTables.js"></script>
+		<style>
+			h1 {
+				width: 100%;
+				border-bottom: 2px solid black;
+			}
+			section {
+				float: left;
+				border: 2px solid green;
+			}
+			#sec_table {
+				width: 80%;
+			}
+			#sec_details {
+			}
+		</style>
+	</head>
+	<body>
+		<h1>MangaParser - Your manga data provider.
+			<a href="/DataTables1.9.4/examples">DT</a> <a href="/jqueryui1.10.3/demos">ui</a>
+		</h1>
+		<section id="sec_table">
+		<table id="datatable">
+			<thead>
+				<tr>
+					<th>A</th>
+					<th>B</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>C</td>
+					<td>D</td>
+				</tr>
+				<tr>
+					<td>E</td>
+					<td>F</td>
+				</tr>
+			</tbody>
+		</table>
+		</section>
+		<section id="sec_details">Details</section>
+		<!-- use script at the end to ensure low building time -->
+		<script>
+			$('#datatable').dataTable();
+		</script>
+	</body>
+</html>
