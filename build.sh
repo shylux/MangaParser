@@ -7,6 +7,11 @@ do
   MYCLASSPATH=${MYCLASSPATH}:${i}
 done
 
+#remove old class files. (there have to be a better solution. but no network atm)
+rm mangaparser/*.class
+rm mangaparser/data/*.class
+rm mangaparser/junit/*.class
+
 #compile
 find -name "*.java" > sources.txt
 javac -classpath "${MYCLASSPATH}" @sources.txt

@@ -23,7 +23,6 @@ public class WebInterface implements Container {
 			PrintStream body = response.getPrintStream();
 			long time = System.currentTimeMillis();
 			
-			response.setValue("Content-Type", "text/xml");
 			response.setValue("Server", "MangaParser/0.1 (Simple 5.1.4)");
 			response.setDate("Date", time);
 			response.setDate("Last-Modified", time);
@@ -45,7 +44,22 @@ public class WebInterface implements Container {
 				}
 			}
 			
-			// data request
+			/* data request */
+			
+			//check for format
+			String format = Encodable.XML;
+			if (request.getQuery().containsKey("format")) {
+				format = request.getQuery().get("format").toUpperCase();
+			}
+			//set content-type according to format
+			String mimeType = "text/plain"; 
+			if (format.equals(Encodable.XML)) {
+				mimeType = "text/xml";
+			} else if (format.equals(Encodable.JSON)) {
+				mimeType = "application/json";
+			}
+			response.setValue("Content-Type", mimeType);
+			
 			if (request.getQuery().containsKey("hoster")) {
 				// get hoster
 				String requestedHoster = request.getQuery().get("hoster");
@@ -53,18 +67,20 @@ public class WebInterface implements Container {
 				if (request.getQuery().containsKey("manga")) {
 					String requestedManga = request.getQuery().get("manga");
 					Manga m = hoster.findMangaByTitle(requestedManga);
-					body.print(m.toXML(Chapter.class));
+					body.print(m.encode(format, Chapter.class));
 				} else {
 					// request hoster
-					body.print(hoster.toXML(Manga.class));
+					body.print(hoster.encode(format, Manga.class));
 				}
 			} else {
 				// default request. list hoster.
 				StringBuilder sb = new StringBuilder();
 				for (Hoster h: MangaParser.getInstance().ds.find(Hoster.class).asList()) {
-					sb.append(h.toXML(Hoster.class));
+					sb.append(h.encode(format, Hoster.class));
 				}
-				body.println(String.format("<Hosters>%s</Hosters>", sb));
+				// add document element for xml
+				if (format.equals(Encodable.XML)) sb = new StringBuilder().append(String.format("<Hosters>%s</Hosters>", sb));
+				body.println(sb);
 			}
 			body.close();
 		} catch(Exception e) {

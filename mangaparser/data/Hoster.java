@@ -5,9 +5,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import mangaparser.Encodable;
 import mangaparser.MangaParser;
-import mangaparser.XMLize;
-
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.annotations.Entity;
@@ -19,7 +18,7 @@ import com.google.code.morphia.annotations.Id;
  *
  */
 @Entity("Hosters")
-public abstract class Hoster implements XMLize {
+public abstract class Hoster implements Encodable {
 	@Id private ObjectId id;
 	
 	String name, address;
@@ -100,19 +99,28 @@ public abstract class Hoster implements XMLize {
 		return String.format("{%s, %s}", getName(), getAddress());
 	}
 	
-	public String toXML() {return toXML(null);}
-	public String toXML(Class<?> limit) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("<Name>%s</Name>", getName()));
-		sb.append(String.format("<Address>%s</Address>", getAddress()));
-		sb.append(String.format("<Icon>%s</Icon>", getIconURL()));
-		if (limit == null | limit != Hoster.class) {
-			sb.append("<Mangas>");
+	public String encode(String type, Class<?> limit) {
+		// templates
+		String templateXML = "<Hoster><Name>%s</Name><Address>%s</Address><Icon>%s</Icon><Mangas>%s</Mangas></Hoster>";
+		String templateJSON = "{'name': '%s', 'address': '%s', 'icon': '%s', 'mangas': [%s]}";
+		
+		// check for limit
+		StringBuilder sbmangas = new StringBuilder();
+		if (limit != Hoster.class) {
 			for (Manga m: mangas) {
-				sb.append(m.toXML(limit));
+				sbmangas.append(String.format("'%s', ", m.encode(type, limit)));
 			}
-			sb.append("</Mangas>");
 		}
-		return String.format("<Hoster>%s</Hoster>", sb);
+		
+		// select format (default XML)
+		String format = templateXML;
+		if (type.equals(Encodable.XML)) {
+			format = templateXML;
+		} else if (type.equals(Encodable.JSON)) {
+			format = templateJSON;
+		}
+
+		// build!
+		return String.format(format, getName(), getAddress(), getIconURL(), sbmangas);
 	}
 }

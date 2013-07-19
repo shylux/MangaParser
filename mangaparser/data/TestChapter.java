@@ -13,12 +13,6 @@ public class TestChapter extends Chapter {
 	}
 
 	@Override
-	public String toXML() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public List<String> loadPages() {
 		List<String> p = new ArrayList<String>();
 		p.add(prefix + "1.jpg");

@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import mangaparser.XMLize;
+import mangaparser.Encodable;
 
 import org.bson.types.ObjectId;
 
@@ -18,7 +18,7 @@ import com.google.code.morphia.annotations.Id;
  *
  */
 @Entity
-public abstract class Chapter implements XMLize {
+public abstract class Chapter implements Encodable {
 	@Id private ObjectId id;
 	
 	String title;
@@ -53,17 +53,26 @@ public abstract class Chapter implements XMLize {
 	 */
 	public abstract List<String> loadPages();
 	
-	public String toXML() {return toXML(null);}
-	public String toXML(Class<?> limit) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<Chapter>");
-		sb.append(String.format("<Title>%s</Title>", getTitle()));
-		sb.append("<Pages>");
-		for (String page: pages) {
-			sb.append(String.format("<Page>%s</Page>", page));
+	public String encode(String type, Class<?> limit) {
+		// templates
+		String templateXML = "<Chapter><Title>%s</Title><Address>%s</Address><Pages>%s</Pages></Chapter>";
+		String templateJSON = "{'title': '%s', 'address': '%s', 'pages': [%s]}";
+		
+		// no embedded objects. so no need for limit.
+		StringBuilder sbpages = new StringBuilder();
+		for (String p: pages) {
+			sbpages.append(String.format("'%s', ", p));
 		}
-		sb.append("</Pages>");
-		sb.append("</Chapter>");
-		return sb.toString();
+		
+		// select format (default XML)
+		String format = templateXML;
+		if (type.equals(Encodable.XML)) {
+			format = templateXML;
+		} else if (type.equals(Encodable.JSON)) {
+			format = templateJSON;
+		}
+
+		// build!
+		return String.format(format, getTitle(), getAddress(), sbpages);
 	}
 }

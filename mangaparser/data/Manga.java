@@ -5,8 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import mangaparser.XMLize;
-
+import mangaparser.Encodable;
 import org.bson.types.ObjectId;
 
 import com.google.code.morphia.annotations.Entity;
@@ -18,7 +17,7 @@ import com.google.code.morphia.annotations.Id;
  *
  */
 @Entity("Mangas")
-public abstract class Manga implements XMLize {
+public abstract class Manga implements Encodable {
 	@Id private ObjectId id;
 	
 	String title, description, author;
@@ -114,23 +113,28 @@ public abstract class Manga implements XMLize {
 		return String.format("{%s by %s, %d}", getTitle(), getAuthor(), getReleaseYear());
 	}
 
-	public String toXML() {return toXML(null);}
-	public String toXML(Class<?> limit) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("<Title>%s</Title>", getTitle()));
-		sb.append(String.format("<Description>%s</Description>", getDescription()));
-		sb.append(String.format("<Author>%s</Author>", getAuthor()));
-		sb.append(String.format("<ReleaseYear>%d</ReleaseYear>", getReleaseYear()));
-		sb.append(String.format("<Cover>%s</Cover>", getCover()));
-		sb.append(String.format("<Address>%s</Address>", getAddress()));
-		sb.append(String.format("<Mature>%b</Mature>", isMature()));
-		if (limit == null | limit == Chapter.class) {
-			sb.append("<Chapters>");
+	public String encode(String type, Class<?> limit) {
+		// templates
+		String templateXML = "<Manga><Title>%s</Title><Description>%s</Description><Author>%s</Author><Chapters>%s</Chapters></Manga>";
+		String templateJSON = "{'title': '%s', 'description': '%s', 'author': '%s', 'chapters': [%s]}";
+		
+		// check for limit
+		StringBuilder sbchapters = new StringBuilder();
+		if (limit != Manga.class) {
 			for (Chapter c: chapters) {
-				sb.append(c.toXML());
+				sbchapters.append(String.format("'%s', ", c.encode(type, limit)));
 			}
-			sb.append("</Chapters>");
 		}
-		return String.format("<Manga>%s</Manga>", sb);
+		
+		// select format (default XML)
+		String format = templateXML;
+		if (type.equals(Encodable.XML)) {
+			format = templateXML;
+		} else if (type.equals(Encodable.JSON)) {
+			format = templateJSON;
+		}
+
+		// build!
+		return String.format(format, getTitle(), getDescription(), getAuthor(), sbchapters);
 	}
 }
