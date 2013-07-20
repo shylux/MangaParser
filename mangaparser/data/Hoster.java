@@ -81,11 +81,24 @@ public abstract class Hoster implements Encodable {
 		return new ArrayList<Manga>();
 	}
 	
+	/**
+	 * Search for manga in hoster.
+	 * @param title Name of manga.
+	 * @return Manga or null if not found.
+	 */
 	public Manga findMangaByTitle(String title) {
 		for (Manga m: mangas) {
 			if (m.title.equals(title)) return m;
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns amount of mangas on hoster.
+	 * @return amount of mangas
+	 */
+	public int getMangaCount() {
+		return mangas.size();
 	}
 	
 	/**
@@ -103,6 +116,7 @@ public abstract class Hoster implements Encodable {
 		// templates
 		String templateXML = "<Hoster><Name>%s</Name><Address>%s</Address><Icon>%s</Icon><Mangas>%s</Mangas></Hoster>";
 		String templateJSON = "{'name': '%s', 'address': '%s', 'icon': '%s', 'mangas': [%s]}";
+		String templateDATATABLES = "['%s', %d]";
 		
 		// check for limit
 		StringBuilder sbmangas = new StringBuilder();
@@ -118,9 +132,15 @@ public abstract class Hoster implements Encodable {
 			format = templateXML;
 		} else if (type.equals(Encodable.JSON)) {
 			format = templateJSON;
+		} else if (type.equals(Encodable.DATATABLES)) {
+			format = templateDATATABLES;
 		}
 
 		// build!
-		return String.format(format, getName(), getAddress(), getIconURL(), sbmangas);
+		if (type.equals(Encodable.DATATABLES)) {
+			return String.format(format, getName(), getMangaCount());
+		} else {
+			return String.format(format, getName(), getAddress(), getIconURL(), sbmangas);
+		}
 	}
 }

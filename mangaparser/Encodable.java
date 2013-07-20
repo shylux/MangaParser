@@ -9,6 +9,8 @@ package mangaparser;
 public interface Encodable {
 	public static final String XML = "XML";
 	public static final String JSON = "JSON";
+	public static final String DATATABLES = "DATATABLES";
+	
 	
 	/**
 	 * Encodes the object to an external format.

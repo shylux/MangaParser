@@ -1,6 +1,7 @@
 package mangaparser;
 
 import java.io.PrintStream;
+import java.util.Iterator;
 
 import mangaparser.data.Chapter;
 import mangaparser.data.Hoster;
@@ -55,37 +56,48 @@ public class WebInterface implements Container {
 			String mimeType = "text/plain"; 
 			if (format.equals(Encodable.XML)) {
 				mimeType = "text/xml";
-			} else if (format.equals(Encodable.JSON)) {
+			} else if (format.equals(Encodable.JSON) | format.equals(Encodable.DATATABLES)) {
 				mimeType = "application/json";
 			}
 			response.setValue("Content-Type", mimeType);
 			
+			String data = "";
 			if (request.getQuery().containsKey("hoster")) {
-				// get hoster
-				String requestedHoster = request.getQuery().get("hoster");
-				Hoster hoster = MangaParser.getInstance().ds.find(Hoster.class, "name", requestedHoster).get();
+				// request specific data
+				Hoster h = MangaParser.getInstance().getDatastore().find(Hoster.class, "name", request.getQuery().get("hoster")).get();
 				if (request.getQuery().containsKey("manga")) {
-					String requestedManga = request.getQuery().get("manga");
-					Manga m = hoster.findMangaByTitle(requestedManga);
-					body.print(m.encode(format, Chapter.class));
+					// request manga
+					Manga m = h.findMangaByTitle(request.getQuery().get("manga"));
+					data = m.encode(format, Chapter.class);
 				} else {
 					// request hoster
-					body.print(hoster.encode(format, Manga.class));
+					data = h.encode(format, Manga.class);
 				}
 			} else {
-				// default request. list hoster.
-				StringBuilder sb = new StringBuilder();
-				for (Hoster h: MangaParser.getInstance().ds.find(Hoster.class).asList()) {
-					sb.append(h.encode(format, Hoster.class));
+				// default request. list hosters
+				//for (Hoster h: MangaParser.getInstance().getDatastore().find(Hoster.class).asList()) {
+				Iterator<Hoster> i = MangaParser.getInstance().getDatastore().find(Hoster.class).asList().iterator();
+				while (i.hasNext()) {
+					Hoster h = i.next();
+					data += h.encode(format, Hoster.class);
+					if (i.hasNext() & (format.equals(Encodable.JSON) | format.equals(Encodable.DATATABLES))) data += ",";
 				}
-				// add document element for xml
-				if (format.equals(Encodable.XML)) sb = new StringBuilder().append(String.format("<Hosters>%s</Hosters>", sb));
-				body.println(sb);
+				if (format.equals(Encodable.JSON) | format.equals(Encodable.DATATABLES))
+					data = String.format("[%s]", data);
 			}
+			
+			if (format.equals(Encodable.XML)) {
+				data = String.format("<Document>%s</Document>", data);
+			} else if (format.equals(Encodable.DATATABLES)) {
+				data = String.format("{'aaData': %s}", data);
+			}
+			
+			if (request.getQuery().containsKey("callback")) data = String.format("%s(%s);", request.getQuery().get("callback"), data);
+			
+			body.print(data);
 			body.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-
 }

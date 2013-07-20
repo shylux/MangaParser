@@ -27,26 +27,28 @@
 		<table id="datatable">
 			<thead>
 				<tr>
-					<th>A</th>
-					<th>B</th>
+					<th>Name</th>
+					<th>Manga Count</th>
 				</tr>
 			</thead>
-			<tbody>
-				<tr>
-					<td>C</td>
-					<td>D</td>
-				</tr>
-				<tr>
-					<td>E</td>
-					<td>F</td>
-				</tr>
-			</tbody>
+			<tbody></tbody>
 		</table>
 		</section>
 		<section id="sec_details">Details</section>
 		<!-- use script at the end to ensure low building time -->
 		<script>
-			$('#datatable').dataTable();
+			alert('test');
+			$.ajax({
+				url: 'http://localhost:1337/?format=datatables',
+				dataType: 'jsonp',
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError);
+				},
+				success: function(data) {
+					alert(data);
+					$('#datatable').dataTable(data);
+				}
+			});
 		</script>
 	</body>
 </html>
