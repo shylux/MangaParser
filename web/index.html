@@ -35,7 +35,7 @@
 		</h1>
 		<section id="hoster">
 			<a href="#" onclick="javascript:loadHoster('TestHoster')"><img src="" />TestHoster</a>
-			<a href="#" onclick="javascript:loadHoster('Mangapanda')"><img src="" />Mangapanda</a>
+			<a href="#" onclick="javascript:loadHoster('MangaPanda')"><img src="" />MangaPanda</a>
 		</section>
 		<section id="sec_table">
 		<table id="datatable">
@@ -52,35 +52,32 @@
 		<!-- use script at the end to ensure low building time -->
 		<script>
 			function loadHoster(hosterName) {
-				/*
 				$.ajax({
-					url: 'http://localhost:1337/?format=datatables',
+					url: 'http://localhost:1337/?format=datatables&hoster='+hosterName,
 					dataType: 'jsonp',
 					error: function(xhr, ajaxOptions, thrownError) {
 						alert(thrownError);
 					},
 					success: function(data) {
-						alert(data);
-						$('#datatable').dataTable(data);
-					}
-				});
-				*/
-				$('#datatable').dataTable({
-					//bProcessing: true,
-					//bServerSide: true,
-					sAjaxSource: 'http://localhost:1337/?format=datatables',
-					fnServerData: function(sUrl, aoData, fnCallback, oSettings) {
-						oSettings.jqXHR = $.ajax({
-							url: sUrl,
-							data: aoData,
-							success: fnCallback,
-							dataType: 'jsonp',
-							cache: false
-						});
+						$('#datatable').dataTable().fnClearTable();
+						$('#datatable').dataTable().fnAddData(data.aaData);
 					}
 				});
 			}
-			loadHoster('TestHoster');
+			$('#datatable').dataTable({
+				//bProcessing: true,
+				//bServerSide: true,
+				sAjaxSource: 'http://localhost:1337/?format=datatables&hoster=TestHoster',
+				fnServerData: function(sUrl, aoData, fnCallback, oSettings) {
+					oSettings.jqXHR = $.ajax({
+						url: sUrl,
+						data: aoData,
+						success: fnCallback,
+						dataType: 'jsonp',
+						cache: false
+					});
+				}
+			});
 		</script>
 	</body>
 </html>

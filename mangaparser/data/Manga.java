@@ -3,6 +3,7 @@ package mangaparser.data;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import mangaparser.Encodable;
@@ -109,11 +110,16 @@ public abstract class Manga implements Encodable {
 	 */
 	public abstract List<Chapter> loadChapters();
 	
+	public int getChapterCount() {
+		return chapters.size();
+	}
+	
 	public String toString() {
 		return String.format("{%s by %s, %d}", getTitle(), getAuthor(), getReleaseYear());
 	}
 
 	public String encode(String type, Class<?> limit) {
+		if (type.equals(Encodable.DATATABLES)) return encodeDataTables(limit);
 		// templates
 		String templateXML = "<Manga><Title>%s</Title><Description>%s</Description><Author>%s</Author><Chapters>%s</Chapters></Manga>";
 		String templateJSON = "{'title': '%s', 'description': '%s', 'author': '%s', 'chapters': [%s]}";
@@ -136,5 +142,23 @@ public abstract class Manga implements Encodable {
 
 		// build!
 		return String.format(format, getTitle(), getDescription(), getAuthor(), sbchapters);
+	}
+	
+	private String encodeDataTables(Class<?> limit) {
+		String templateDATATABLES = "['%s', '%s', %d, %d]";
+		if (limit == Manga.class) {
+			return String.format(templateDATATABLES, getTitle(), getAuthor(), getReleaseYear(), getChapterCount());
+		} else if (limit == Chapter.class) {
+			StringBuilder sb = new StringBuilder().append("[");
+			Iterator<Chapter> i = chapters.iterator();
+			while (i.hasNext()) {
+				Chapter m = i.next();
+				sb.append(m.encode(Encodable.DATATABLES, limit));
+				if (i.hasNext()) sb.append(",");
+			}
+			sb.append("]");
+			return sb.toString();
+		}
+		return null;
 	}
 }

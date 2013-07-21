@@ -3,6 +3,7 @@ package mangaparser.data;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import mangaparser.Encodable;
@@ -113,16 +114,21 @@ public abstract class Hoster implements Encodable {
 	}
 	
 	public String encode(String type, Class<?> limit) {
+		if (type.equals(Encodable.DATATABLES)) return encodeDataTables(limit);
+		
 		// templates
 		String templateXML = "<Hoster><Name>%s</Name><Address>%s</Address><Icon>%s</Icon><Mangas>%s</Mangas></Hoster>";
 		String templateJSON = "{'name': '%s', 'address': '%s', 'icon': '%s', 'mangas': [%s]}";
-		String templateDATATABLES = "['%s', %d]";
+
 		
 		// check for limit
 		StringBuilder sbmangas = new StringBuilder();
 		if (limit != Hoster.class) {
-			for (Manga m: mangas) {
-				sbmangas.append(String.format("'%s', ", m.encode(type, limit)));
+			Iterator<Manga> i = mangas.iterator();
+			while (i.hasNext()) {
+				Manga m = i.next();
+				sbmangas.append(m.encode(type, limit));
+				if (i.hasNext() && type.equals(Encodable.JSON)) sbmangas.append(",");
 			}
 		}
 		
@@ -132,15 +138,27 @@ public abstract class Hoster implements Encodable {
 			format = templateXML;
 		} else if (type.equals(Encodable.JSON)) {
 			format = templateJSON;
-		} else if (type.equals(Encodable.DATATABLES)) {
-			format = templateDATATABLES;
 		}
 
 		// build!
-		if (type.equals(Encodable.DATATABLES)) {
-			return String.format(format, getName(), getMangaCount());
-		} else {
-			return String.format(format, getName(), getAddress(), getIconURL(), sbmangas);
+		return String.format(format, getName(), getAddress(), getIconURL(), sbmangas);
+	}
+	
+	private String encodeDataTables(Class<?> limit) {
+		if (limit == Hoster.class) {
+			// request hoster
+			return String.format("['%s', %d]", getName(), getMangaCount());
+		} else if (limit == Manga.class) {
+			StringBuilder sb = new StringBuilder().append("[");
+			Iterator<Manga> i = mangas.iterator();
+			while (i.hasNext()) {
+				Manga m = i.next();
+				sb.append(m.encode(Encodable.DATATABLES, limit));
+				if (i.hasNext()) sb.append(",");
+			}
+			sb.append("]");
+			return sb.toString();
 		}
+		return null;
 	}
 }
