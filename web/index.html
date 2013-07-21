@@ -3,6 +3,7 @@
 	<head>
 		<script type="text/javascript" src="/DataTables1.9.4/media/js/jquery.js"></script>
 		<script type="text/javascript" src="/DataTables1.9.4/media/js/jquery.dataTables.js"></script>
+		<style type="text/css" src="/jquery-ui-1.8.4.custom.css"></style>
 		<style>
 			h1 {
 				width: 100%;
@@ -12,8 +13,17 @@
 				float: left;
 				border: 2px solid green;
 			}
+			#hoster a {
+				display: block;
+				float: left;
+				vertical-align: center;
+				height: 2em;
+			}
 			#sec_table {
 				width: 80%;
+			}
+			#datatable {
+				width: 100%;
 			}
 			#sec_details {
 			}
@@ -23,6 +33,10 @@
 		<h1>MangaParser - Your manga data provider.
 			<a href="/DataTables1.9.4/examples">DT</a> <a href="/jqueryui1.10.3/demos">ui</a>
 		</h1>
+		<section id="hoster">
+			<a href="#" onclick="javascript:loadHoster('TestHoster')"><img src="" />TestHoster</a>
+			<a href="#" onclick="javascript:loadHoster('Mangapanda')"><img src="" />Mangapanda</a>
+		</section>
 		<section id="sec_table">
 		<table id="datatable">
 			<thead>
@@ -37,18 +51,36 @@
 		<section id="sec_details">Details</section>
 		<!-- use script at the end to ensure low building time -->
 		<script>
-			alert('test');
-			$.ajax({
-				url: 'http://localhost:1337/?format=datatables',
-				dataType: 'jsonp',
-				error: function(xhr, ajaxOptions, thrownError) {
-					alert(thrownError);
-				},
-				success: function(data) {
-					alert(data);
-					$('#datatable').dataTable(data);
-				}
-			});
+			function loadHoster(hosterName) {
+				/*
+				$.ajax({
+					url: 'http://localhost:1337/?format=datatables',
+					dataType: 'jsonp',
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError);
+					},
+					success: function(data) {
+						alert(data);
+						$('#datatable').dataTable(data);
+					}
+				});
+				*/
+				$('#datatable').dataTable({
+					//bProcessing: true,
+					//bServerSide: true,
+					sAjaxSource: 'http://localhost:1337/?format=datatables',
+					fnServerData: function(sUrl, aoData, fnCallback, oSettings) {
+						oSettings.jqXHR = $.ajax({
+							url: sUrl,
+							data: aoData,
+							success: fnCallback,
+							dataType: 'jsonp',
+							cache: false
+						});
+					}
+				});
+			}
+			loadHoster('TestHoster');
 		</script>
 	</body>
 </html>

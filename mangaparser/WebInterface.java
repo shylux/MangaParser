@@ -61,6 +61,7 @@ public class WebInterface implements Container {
 			}
 			response.setValue("Content-Type", mimeType);
 			
+			//get actual data
 			String data = "";
 			if (request.getQuery().containsKey("hoster")) {
 				// request specific data
