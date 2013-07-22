@@ -38,9 +38,11 @@ public class WebInterface implements Container {
 						String requestedManga = request.getQuery().get("manga");
 						Manga manga = hoster.findMangaByTitle(requestedManga);
 						manga.loadChapters();
+						hoster.save();
 					} else {
 						// refresh mangas
 						hoster.loadMangas();
+						hoster.save();
 					}
 				}
 			}
@@ -76,7 +78,6 @@ public class WebInterface implements Container {
 				}
 			} else {
 				// default request. list hosters
-				//for (Hoster h: MangaParser.getInstance().getDatastore().find(Hoster.class).asList()) {
 				Iterator<Hoster> i = MangaParser.getInstance().getDatastore().find(Hoster.class).asList().iterator();
 				while (i.hasNext()) {
 					Hoster h = i.next();

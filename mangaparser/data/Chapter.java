@@ -3,6 +3,7 @@ package mangaparser.data;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import mangaparser.Encodable;
@@ -60,6 +61,15 @@ public abstract class Chapter implements Encodable {
 		
 		// no embedded objects. so no need for limit.
 		StringBuilder sbpages = new StringBuilder();
+		Iterator<String> i = pages.iterator();
+		while (i.hasNext()) {
+			String page = i.next();
+			if (type.equals(Encodable.XML)) sbpages.append(String.format("<Page>%s</Page>", page));
+			if (type.equals(Encodable.JSON)) {
+				sbpages.append(String.format("'%s'", page));
+				if (i.hasNext()) sbpages.append(",");
+			}
+		}
 		for (String p: pages) {
 			sbpages.append(String.format("'%s', ", p));
 		}

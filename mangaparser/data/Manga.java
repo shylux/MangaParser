@@ -121,14 +121,20 @@ public abstract class Manga implements Encodable {
 	public String encode(String type, Class<?> limit) {
 		if (type.equals(Encodable.DATATABLES)) return encodeDataTables(limit);
 		// templates
-		String templateXML = "<Manga><Title>%s</Title><Description>%s</Description><Author>%s</Author><Chapters>%s</Chapters></Manga>";
-		String templateJSON = "{'title': '%s', 'description': '%s', 'author': '%s', 'chapters': [%s]}";
+		String templateXML = "<Manga><Title>%s</Title><Description>%s</Description><Author>%s</Author><ReleaseYear>%d</ReleaseYear><Mature>%b</Mature><Cover>%s</Cover><Address>%s</Address><Chapters>%s</Chapters></Manga>";
+		String templateJSON = "{title: '%s', description: '%s', author: '%s', releaseYear: %d, mature: %b, cover: '%s', address: '%s', chapters: [%s]}";
 		
 		// check for limit
 		StringBuilder sbchapters = new StringBuilder();
 		if (limit != Manga.class) {
-			for (Chapter c: chapters) {
-				sbchapters.append(String.format("'%s', ", c.encode(type, limit)));
+			Iterator<Chapter> i = chapters.iterator();
+			while (i.hasNext()) {
+				Chapter c = i.next();
+				if (type.equals(Encodable.XML)) sbchapters.append(String.format("<Chapter>%s</Chapter>", c.encode(type, limit)));
+				if (type.equals(Encodable.JSON)) {
+					sbchapters.append(c.encode(type, limit));
+					if (i.hasNext()) sbchapters.append(",");
+				}
 			}
 		}
 		
@@ -141,7 +147,7 @@ public abstract class Manga implements Encodable {
 		}
 
 		// build!
-		return String.format(format, getTitle(), getDescription(), getAuthor(), sbchapters);
+		return String.format(format, getTitle(), getDescription(), getAuthor(), getReleaseYear(), isMature(), getCover(), getAddress(), sbchapters);
 	}
 	
 	private String encodeDataTables(Class<?> limit) {

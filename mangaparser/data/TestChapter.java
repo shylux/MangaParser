@@ -8,8 +8,9 @@ public class TestChapter extends Chapter {
 	
 	@SuppressWarnings("unused") // for mongodb
 	private TestChapter() {}
-	public TestChapter(String prefix) {
-		this.prefix = prefix;
+	public TestChapter(String title) {
+		this.address = title;
+		this.title = getAddress().getFile();
 	}
 
 	@Override

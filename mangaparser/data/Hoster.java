@@ -73,16 +73,6 @@ public abstract class Hoster implements Encodable {
 	public abstract List<Manga> loadMangas();
 	
 	/**
-	 * Loads mangas from local db.
-	 * Fast and no network connection required. But of course not updated. 
-	 * @return list of mangas in db
-	 */
-	public List<Manga> queryMangas() {
-		//TODO query mangas from db
-		return new ArrayList<Manga>();
-	}
-	
-	/**
 	 * Search for manga in hoster.
 	 * @param title Name of manga.
 	 * @return Manga or null if not found.

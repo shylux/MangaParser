@@ -16,16 +16,23 @@
 			#hoster a {
 				display: block;
 				float: left;
-				vertical-align: center;
 				height: 2em;
 			}
+			#hoster .active {
+				background-color: red;
+			}
 			#sec_table {
-				width: 80%;
+				width: 60%;
+				clear: left;
 			}
 			#datatable {
 				width: 100%;
 			}
+			#datatable .active {
+				background-color: red;
+			}
 			#sec_details {
+				width: 30%;
 			}
 		</style>
 	</head>
@@ -34,24 +41,42 @@
 			<a href="/DataTables1.9.4/examples">DT</a> <a href="/jqueryui1.10.3/demos">ui</a>
 		</h1>
 		<section id="hoster">
-			<a href="#" onclick="javascript:loadHoster('TestHoster')"><img src="" />TestHoster</a>
-			<a href="#" onclick="javascript:loadHoster('MangaPanda')"><img src="" />MangaPanda</a>
+			<a class="active" href="#" onclick="javascript:loadHoster(this)"><img src="" />TestHoster</a>
+			<a href="#" onclick="javascript:loadHoster(this)"><img src="" />MangaPanda</a>
 		</section>
 		<section id="sec_table">
 		<table id="datatable">
 			<thead>
 				<tr>
 					<th>Name</th>
-					<th>Manga Count</th>
+					<th>Author</th>
+					<th>Release Year</th>
+					<th>Chapter Count</th>
 				</tr>
 			</thead>
 			<tbody></tbody>
 		</table>
 		</section>
-		<section id="sec_details">Details</section>
+		<section id="sec_details">
+			<dl>
+				<dt>Title</dt>
+				<dd id="dlTitle">value</dd>
+				<dt>Author</dt>
+				<dd id="dlAuthor">value</dd>
+				<dt>Release Year</dt>
+				<dd id="dlReleaseYear">value</dd>
+				<dt>Mature</dt>
+				<dd id="dlMature">value</dd>
+				<dt>Address</dt>
+				<dd id="dlAddress">value</dd>
+			</dl>
+		</section>
 		<!-- use script at the end to ensure low building time -->
 		<script>
-			function loadHoster(hosterName) {
+			function loadHoster(nHoster) {
+				var hosterName = $(nHoster).text();
+				$('#hoster .active').removeClass('active');
+				$(nHoster).addClass('active');
 				$.ajax({
 					url: 'http://localhost:1337/?format=datatables&hoster='+hosterName,
 					dataType: 'jsonp',
@@ -77,6 +102,26 @@
 						cache: false
 					});
 				}
+			});
+			$('#datatable tbody tr').live('click', function() {
+				$('#datatable .active').removeClass('active');
+				$(this).addClass('active');
+				var nTds = $('td', this);
+				var sName = $(nTds[0]).text();
+				$.ajax({
+					url: 'http://localhost:1337/?format=json&hoster='+$('#hoster .active').text() + '&manga=' + sName,
+					dataType: 'jsonp',
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError);
+					},
+					success: function(data) {
+						$('#dlTitle').html(data.title);
+						$('#dlAuthor').html(data.author);
+						$('#dlReleaseYear').html(data.releaseYear);
+						$('#dlMature').html(data.mature?"Yes":"No");
+						$('#dlAddress').html(data.address);
+					}
+				});
 			});
 		</script>
 	</body>
