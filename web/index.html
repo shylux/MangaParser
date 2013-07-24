@@ -45,19 +45,21 @@
 			<a href="#" onclick="javascript:loadHoster(this)"><img src="" />MangaPanda</a>
 		</section>
 		<section id="sec_table">
-		<table id="datatable">
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>Author</th>
-					<th>Release Year</th>
-					<th>Chapter Count</th>
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
+			<a href="#" onclick="javascript:refreshHoster()">Refresh Hoster</a>
+			<table id="datatable">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Author</th>
+						<th>Release Year</th>
+						<th>Chapter Count</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
 		</section>
 		<section id="sec_details">
+			<a href="#" onclick="javascript:refreshManga()">Refresh Manga</a>
 			<dl>
 				<dt>Title</dt>
 				<dd id="dlTitle">value</dd>
@@ -89,6 +91,8 @@
 					}
 				});
 			}
+
+			// INIT
 			$('#datatable').dataTable({
 				//bProcessing: true,
 				//bServerSide: true,
@@ -103,26 +107,56 @@
 					});
 				}
 			});
+
+			// DETAILS
+			var oChapter;
 			$('#datatable tbody tr').live('click', function() {
 				$('#datatable .active').removeClass('active');
 				$(this).addClass('active');
 				var nTds = $('td', this);
 				var sName = $(nTds[0]).text();
 				$.ajax({
-					url: 'http://localhost:1337/?format=json&hoster='+$('#hoster .active').text() + '&manga=' + sName,
+					url: 'http://localhost:1337/?format=json&hoster='+$('#hoster .active').text() + '&manga=' + sName + "&pages=",
 					dataType: 'jsonp',
 					error: function(xhr, ajaxOptions, thrownError) {
 						alert(thrownError);
 					},
 					success: function(data) {
-						$('#dlTitle').html(data.title);
-						$('#dlAuthor').html(data.author);
-						$('#dlReleaseYear').html(data.releaseYear);
-						$('#dlMature').html(data.mature?"Yes":"No");
-						$('#dlAddress').html(data.address);
+						oChapter = data;
+						$('#dlTitle').html(oChapter.title);
+						$('#dlAuthor').html(oChapter.author);
+						$('#dlReleaseYear').html(oChapter.releaseYear);
+						$('#dlMature').html(oChapter.mature?"Yes":"No");
+						$('#dlAddress').html(oChapter.address);
 					}
 				});
 			});
+
+			// REFRESH
+			function refreshHoster() {
+				$.ajax({
+					url: 'http://localhost:1337/?format=json&hoster='+$('#hoster .active').text() + '&refresh=',
+					dataType: 'jsonp',
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError);
+					},
+					success: function(data) {
+						loadHoster($('#hoster .active'));
+					}
+				});
+			}
+			function refreshManga() {
+				$.ajax({
+					url: 'http://localhost:1337/?format=json&hoster=' + $('#hoster .active').text() + '&manga=' + $('#datatable tbody tr.active td:first-child').text() + '&refresh=',
+					dataType: 'jsonp',
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError);
+					},
+					success: function(data) {
+						
+					}
+				});
+			}
 		</script>
 	</body>
 </html>

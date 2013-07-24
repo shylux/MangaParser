@@ -110,6 +110,9 @@ public abstract class Manga implements Encodable {
 	 */
 	public abstract List<Chapter> loadChapters();
 	
+	public List<Chapter> getChapters() {
+		return chapters;
+	}
 	public int getChapterCount() {
 		return chapters.size();
 	}
@@ -130,7 +133,7 @@ public abstract class Manga implements Encodable {
 			Iterator<Chapter> i = chapters.iterator();
 			while (i.hasNext()) {
 				Chapter c = i.next();
-				if (type.equals(Encodable.XML)) sbchapters.append(String.format("<Chapter>%s</Chapter>", c.encode(type, limit)));
+				if (type.equals(Encodable.XML)) sbchapters.append(c.encode(type, limit));
 				if (type.equals(Encodable.JSON)) {
 					sbchapters.append(c.encode(type, limit));
 					if (i.hasNext()) sbchapters.append(",");

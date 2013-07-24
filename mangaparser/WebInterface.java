@@ -28,6 +28,8 @@ public class WebInterface implements Container {
 			response.setDate("Date", time);
 			response.setDate("Last-Modified", time);
 			
+			System.out.println(request.getQuery().keySet());
+			
 			// issue refresh
 			if (request.getQuery().containsKey("refresh")) {
 				if (request.getQuery().containsKey("hoster")) {
@@ -38,6 +40,11 @@ public class WebInterface implements Container {
 						String requestedManga = request.getQuery().get("manga");
 						Manga manga = hoster.findMangaByTitle(requestedManga);
 						manga.loadChapters();
+						if (request.getQuery().containsKey("pages")) {
+							for (Chapter c: manga.getChapters()) {
+								c.loadPages();
+							}
+						}
 						hoster.save();
 					} else {
 						// refresh mangas
@@ -71,7 +78,11 @@ public class WebInterface implements Container {
 				if (request.getQuery().containsKey("manga")) {
 					// request manga
 					Manga m = h.findMangaByTitle(request.getQuery().get("manga"));
-					data = m.encode(format, Chapter.class);
+					if (request.getQuery().containsKey("pages")) {
+						data = m.encode(format, null);
+					} else {
+						data = m.encode(format, Chapter.class);
+					}
 				} else {
 					// request hoster
 					data = h.encode(format, Manga.class);

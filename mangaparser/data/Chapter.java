@@ -70,9 +70,6 @@ public abstract class Chapter implements Encodable {
 				if (i.hasNext()) sbpages.append(",");
 			}
 		}
-		for (String p: pages) {
-			sbpages.append(String.format("'%s', ", p));
-		}
 		
 		// select format (default XML)
 		String format = templateXML;
